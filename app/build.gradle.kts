@@ -89,6 +89,7 @@ dependencies {
 
 	implementation(LibraryDependencies.CameraX.Camera2)
 	implementation(LibraryDependencies.CameraX.View)
+	implementation(LibraryDependencies.CameraX.Lifecycle)
 }
 
 fun com.android.build.gradle.internal.dsl.BaseFlavor.buildConfigFieldFromGradleProperty(gradlePropertyName: String) {
