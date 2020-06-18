@@ -1,36 +1,27 @@
 package com.yolisstorm.app.views.activities.camera_main
 
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.yolisstorm.app.R
 import com.yolisstorm.app.databinding.ActivityCameraBinding
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.getViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.context.loadKoinModules
-import org.koin.core.module.Module
 
 
 class CameraActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        
-        super.onCreate(savedInstanceState)
+	private lateinit var binding: ActivityCameraBinding
+	private val viewModel : CameraViewModel by lazy { getViewModel(CameraViewModel::class) }
 
-        val binding : ActivityCameraBinding = DataBindingUtil.setContentView(this, R.layout.activity_camera)
+	override fun onCreate(savedInstanceState: Bundle?) {
 
-        val viewModel by viewModel<CameraViewModel>()
+		super.onCreate(savedInstanceState)
 
-        binding.lifecycleOwner = this
+		binding = DataBindingUtil.setContentView(this, R.layout.activity_camera)
 
-	    binding.viewModel = viewModel
+		binding.lifecycleOwner = this
 
-    }
+		binding.viewModel = viewModel
+
+	}
 }

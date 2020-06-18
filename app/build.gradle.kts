@@ -2,6 +2,7 @@ plugins {
 	id(GradlePluginId.ANDROID_APPLICATION)
 	kotlin("android")
 	kotlin("android.extensions")
+	kotlin("kapt")
 	id(GradlePluginId.DETEKT)
 	id(GradlePluginId.CRASHLYTICS_PLUGIN)
 	id(GradlePluginId.GRADLE_UPDATE_PLUGIN)
