@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.yolisstorm.app.enums.CaptureStatus
 import com.yolisstorm.app.utils.Event
+import java.io.File
 
 class CameraViewModel (
 	private val repository: CameraRepository,
@@ -22,8 +23,8 @@ class CameraViewModel (
 	val captureStatus : LiveData<CaptureStatus>
 	    get() = _captureStatus
 
-	private val _savedFilePath = MutableLiveData<Uri?>(null)
-	val filePath : LiveData<Uri?>
+	private val _savedFilePath = MutableLiveData<File?>(null)
+	val savedFilePath : LiveData<File?>
 	    get() = _savedFilePath
 
 }
