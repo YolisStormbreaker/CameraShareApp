@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScreenGeneratorConfiguration">
+    <option name="settings">
+      <Settings>
+        <option name="screenElements">
+          <list>
+            <ScreenElement>
+              <option name="fileNameTemplate" value="%componentLowerCase%_%screenNameSnakeCase%" />
+              <option name="fileType" value="Layout XML" />
+              <option name="name" value="layout" />
+              <option name="template" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#10;&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;&#10;&#10;&#9;&lt;data&gt;&#10;&#9;&#9;&lt;variable&#10;&#9;&#9;&#9;name=&quot;viewModel&quot;&#10;&#9;&#9;&#9;type=&quot;%packageName%.%screenName%ViewModel&quot; /&gt;&#10;&#9;&lt;/data&gt;&#10;&#10;&#9;&lt;androidx.constraintlayout.widget.ConstraintLayout&#10;&#9;&#9;android:layout_width=&quot;match_parent&quot;&#10;&#9;&#9;android:layout_height=&quot;match_parent&quot;&gt;&#10;&#10;&#9;&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;&#10;&lt;/layout&gt;" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Fragment" />
+              <option name="template" value="package %packageName%&#10;&#10;import android.os.Bundle&#10;import android.view.LayoutInflater&#10;import android.view.View&#10;import android.view.ViewGroup&#10;import androidx.databinding.DataBindingUtil&#10;import androidx.fragment.app.Fragment&#10;import androidx.lifecycle.ViewModelProvider&#10;import org.koin.android.viewmodel.ext.android.viewModel&#10;&#10;class %screenName%%screenElement% : Fragment() {&#10;&#10;    override fun onCreateView(&#10;            inflater: LayoutInflater,&#10;            container: ViewGroup?,&#10;            savedInstanceState: Bundle?&#10;    ): View? {&#10;&#10;        val binding : %screenName%LayoutBinding = DataBindingUtil.inflate(inflater, R.layout.%screenNameSnakeCase%_layout, container, false)&#10;&#10;        val viewModel  by viewModel&lt;%screenName%ViewModel&gt;()&#10;&#10;        binding.lifecycleOwner = this&#10;&#10;&#9;    binding.viewModel = viewModel&#10;&#10;        return binding.root&#10;    }&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="ViewModel" />
+              <option name="template" value="package %packageName%&#10;&#10;import android.app.Application&#10;import androidx.lifecycle.AndroidViewModel&#10;&#10;class %screenName%%screenElement% (&#10;repository: %screenName%Repository,&#10;application: Application&#10;) : AndroidViewModel(application) {&#10;&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="Repository" />
+              <option name="template" value="package %packageName%&#10;&#10;class %screenName%%screenElement% private constructor(&#10;) {&#10;&#10;    companion object {&#10;&#10;        //Для Singleton&#10;        @Volatile&#10;        private var instance: %screenName%%screenElement%? = null&#10;&#10;        fun getInstance() =&#10;                instance ?: synchronized(this) {&#10;                    instance ?: %screenName%%screenElement%().also { instance = it }&#10;                }&#10;        }&#10;&#10;}" />
+            </ScreenElement>
+            <ScreenElement>
+              <option name="fileNameTemplate" value="%screenName%%screenElement%" />
+              <option name="name" value="KoinModule" />
+              <option name="template" value="package %packageName%&#10;&#10;import org.koin.android.ext.koin.androidApplication&#10;import org.koin.android.viewmodel.dsl.viewModel&#10;import org.koin.core.module.Module&#10;import org.koin.dsl.module&#10;&#10;val %screenName%%screenElement%  = module {&#10;&#9;single { %screenName%Repository.getInstance() }&#10;&#9;viewModel { %screenName%ViewModel(get(), androidApplication()) }&#10;}" />
+            </ScreenElement>
+          </list>
+        </option>
+      </Settings>
+    </option>
+  </component>
+</project>
