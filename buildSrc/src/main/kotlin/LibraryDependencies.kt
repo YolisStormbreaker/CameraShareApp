@@ -4,17 +4,19 @@ private object LibraryVersion {
 	const val ACTIVITY 						= 	"1.2.0-alpha05"
 	const val APPCOMPAT 					= 	"1.3.0-alpha01"
 	const val BTN_WITH_CIRCLE_LOADER 		= 	"2.2.0"
+	const val CAMERA_X                      =   "1.0.0-beta05"
+	const val CAMERA_X_ADDITIONAL           =   "1.0.0-alpha12"
 	const val CIRCLE_IMAGEVIEW 				= 	"3.0.1"
 	const val CONSTRAINT_LAYOUT 			= 	"2.0.0-beta7"
 	const val COORDINATOR_LAYOUT 			= 	"1.1.0"
-	const val CORE_KTX 						= 	"1.4.0-alpha01"
+	const val CORE_KTX 						= 	"1.5.0-alpha01"
 	const val FIREBASE_AUTH 				= 	"19.1.0"
 	const val FIREBASE_CRASHLYTICS 			= 	"2.10.1"
 	const val FIREBASE_CORE 				= 	"17.2.0"
 	const val FIREBASE_KTX 					= 	"19.1.0"
 	const val FIREBASE_MESSAGING 			= 	"20.0.0"
 	const val FLOATING_SEARCH_VIEW 			= 	"2.1.1"
-	const val FRAGMENT 						= 	"1.3.0-alpha05"
+	const val FRAGMENT 						= 	"1.3.0-alpha06"
 	const val GLIDE 						= 	"4.11.0"
 	const val G_MAPS 						= 	"17.0.0"
 	const val G_MAPS_KTX 					= 	"0.3.1"
@@ -24,7 +26,7 @@ private object LibraryVersion {
 	const val G_PLAY_SERVICES 				= 	"17.0.0"
 	const val GSON 							= 	"2.8.6"
 	const val LEAKCANARY 					= 	"2.3"
-	const val LIFECYCLE 					= 	"2.3.0-alpha03"
+	const val LIFECYCLE 					= 	"2.3.0-alpha04"
 	const val LIFECYCLE_EXT 				= 	"2.2.0"
 	const val MATERIAL_CALENDAR 			= 	"1.7.0"
 	const val MATERIAL 						= 	"1.3.0-alpha01"
@@ -83,6 +85,19 @@ object LibraryDependencies {
 					const val Maps              =   "com.google.android.gms:play-services-maps:${LibraryVersion.G_PLAY_SERVICES}"
 			}
 		}
+
+	}
+
+	object CameraX {
+		const val Camera2               =   "androidx.camera:camera-camera2:${LibraryVersion.CAMERA_X}"
+		//The following line is optional, as the core library is included indirectly by camera-camera2
+		const val Core                  =   "androidx.camera:camera-core:${LibraryVersion.CAMERA_X}"
+		// If you want to additionally use the CameraX Lifecycle library
+		const val Lifecycle             =   "androidx.camera:camera-lifecycle:${LibraryVersion.CAMERA_X}"
+		// If you want to additionally use the CameraX View class
+		const val View                  =   "androidx.camera:camera-view:${LibraryVersion.CAMERA_X_ADDITIONAL}"
+		// If you want to additionally use the CameraX Extensions library
+		const val Extensions            =   "androidx.camera:camera-extensions:${LibraryVersion.CAMERA_X_ADDITIONAL}"
 	}
 
 	object Facebook {

@@ -1,6 +1,6 @@
 // Versions consts that are used across libraries and Gradle plugins
 object CoreVersion {
-	const val COROUTINES_ANDROID            =   "1.3.5"
+	const val COROUTINES_ANDROID            =   "1.3.7"
 	const val CRASHLYTICS_GRADLE            =   "2.1.1"
 	const val KOIN                          =   "2.1.5"
 	const val KOTLIN                        =   "1.3.72"
