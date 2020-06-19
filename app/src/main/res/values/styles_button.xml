@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget.Yolis.Button.Default" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/button_color</item>
+        <item name="android:textColor">@color/colorPrimaryText</item>
+        <item name="iconTint">@color/colorPrimaryText</item>
+    </style>
+
+</resources>
