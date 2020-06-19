@@ -1,18 +1,14 @@
 package com.yolisstorm.app.views.activities.camera_main
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.content.pm.ResolveInfo
 import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.webkit.MimeTypeMap
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -20,6 +16,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import com.google.common.util.concurrent.ListenableFuture
 import com.yolisstorm.app.BuildConfig
@@ -35,7 +32,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.jar.Manifest
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -110,19 +106,36 @@ class CameraActivity : AppCompatActivity() {
 
 	private fun shareFile(file: File) {
 		Timber.d("Let's share!")
+		val uri = FileProvider.getUriForFile(
+			applicationContext, BuildConfig.APPLICATION_ID + ".provider", file)
 		// Create a sharing intent
 		val intent = Intent().apply {
 			// Infer media type from file extension
 			val mediaType = MimeTypeMap.getSingleton()
 				.getMimeTypeFromExtension(file.extension)
 			// Get URI from our FileProvider implementation
-			val uri = FileProvider.getUriForFile(
-				applicationContext, BuildConfig.APPLICATION_ID + ".provider", file)
+
 			// Set the appropriate intent extra, type, action and flags
 			putExtra(Intent.EXTRA_STREAM, uri)
 			type = mediaType
 			action = Intent.ACTION_SEND
 			flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+		}
+		val resInfoList: List<ResolveInfo> = this.packageManager
+			.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+
+		for (resolveInfo in resInfoList) {
+			val packageName: String = resolveInfo.activityInfo.packageName
+			grantUriPermission(
+				packageName,
+				file.toUri(),
+				Intent.FLAG_GRANT_READ_URI_PERMISSION
+			)
+			grantUriPermission(
+				packageName,
+				uri,
+				Intent.FLAG_GRANT_READ_URI_PERMISSION
+			)
 		}
 		// Launch the intent letting the user choose which app to share with
 		startActivity(Intent.createChooser(intent, getString(R.string.share_hint)))
