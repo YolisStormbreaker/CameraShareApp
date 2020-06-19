@@ -1,6 +1,7 @@
 package com.yolisstorm.app.utils
 
 import androidx.databinding.BindingAdapter
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textview.MaterialTextView
 import com.yolisstorm.app.R
 import com.yolisstorm.app.enums.CaptureStatus
@@ -23,5 +24,13 @@ fun MaterialTextView.setStatus(status: CaptureStatus?, filePath: String?) {
 		CaptureStatus.Error -> {
 			resources.getString(R.string.status_error)
 		}
+	}
+}
+
+@BindingAdapter("setStatus")
+fun MaterialButton.setStatus(status: CaptureStatus?) {
+	isEnabled = when (status) {
+		CaptureStatus.ReadyToShoot -> true
+		else -> false
 	}
 }

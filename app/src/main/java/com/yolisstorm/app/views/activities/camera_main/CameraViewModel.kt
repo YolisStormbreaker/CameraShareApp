@@ -29,28 +29,30 @@ class CameraViewModel (
 	    get() = _captureStatus
 	fun updateStatus(status: CaptureStatus, file: File? = null) {
 		when (status) {
-			CaptureStatus.ReadyToShoot,
 			CaptureStatus.Error -> {
 				_captureStatus.postValue(status)
 			}
+			CaptureStatus.ReadyToShoot,
 			CaptureStatus.FileSaved -> {
-				file?.let {
-					_savedFilePath.value = it
-					_captureStatus.value = status
+				if (file != null) {
+					_savedFilePath.postValue(Event(file))
+					_captureStatus.postValue(status)
+				} else if (_savedFilePath.value?.peekContent() == null && status == CaptureStatus.ReadyToShoot) {
+					_captureStatus.postValue(status)
 				}
 			}
 		}
 	}
 
-	private val _savedFilePath = MutableLiveData<File?>(null)
-	val savedFilePath : LiveData<File?>
+	private val _savedFilePath = MutableLiveData<Event<File?>>(Event(null))
+	val savedFilePath : LiveData<Event<File?>>
 	    get() = _savedFilePath
 
 	private val _permissionGrantedResult = MutableLiveData<Event<Boolean>>()
 	val permissionGrantedResult : LiveData<Event<Boolean>>
 	    get() = _permissionGrantedResult
 	fun changePermissionStatus(isGranted: Boolean) {
-		_permissionGrantedResult.value = Event(isGranted)
+		_permissionGrantedResult.postValue(Event(isGranted))
 	}
 
 	fun requestCameraPermission(activity: Activity) {
@@ -64,7 +66,7 @@ class CameraViewModel (
 	}
 
 	fun checkIsCameraPermissionGranted(activity: Activity) {
-		_permissionGrantedResult.value = Event(checkAccessPermissionGranted(activity, Manifest.permission.CAMERA))
+		_permissionGrantedResult.postValue(Event(checkAccessPermissionGranted(activity, Manifest.permission.CAMERA)))
 	}
 
 	val REQUEST_CAMERA_PERMISSION = 2707

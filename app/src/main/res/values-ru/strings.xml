@@ -7,4 +7,5 @@
     <string name="status_error">Ошибка</string>
     <string name="polite_camera_access_content">Для работы приложения необходим доступ к камере</string>
     <string name="polite_camera_access_title">Запрос доступа к камере</string>
+	<string name="share_hint">Поделиться через</string>
 </resources>
