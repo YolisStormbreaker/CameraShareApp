@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import com.yolisstorm.app.R
 
 
 /**
@@ -47,7 +48,7 @@ fun requestPermission(
 			// Show an explanation to the user *asynchronously* -- don't block
 			// this thread waiting for the user's response! After the user
 			// sees the explanation, try again to request the permission.
-			val alertBuilder = AlertDialog.Builder(activity)
+			val alertBuilder = AlertDialog.Builder(activity, R.style.DialogTheme)
 			alertBuilder.setCancelable(true)
 			alertBuilder.setTitle(explanationTitle)
 			alertBuilder.setMessage(explanationContent)

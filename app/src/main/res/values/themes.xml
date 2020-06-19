@@ -11,11 +11,9 @@
 		<item name="android:textColorSecondary">@color/colorSecondaryText</item>
 	</style>
 
-	<style name="AppTheme.SplashScreen">
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
-		<item name="android:windowFullscreen">true</item>
+	<style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
 		<item name="android:background">@color/colorPrimary</item>
+		<item name="android:textColorPrimary">@color/colorPrimaryText</item>
 	</style>
 
 </resources>
