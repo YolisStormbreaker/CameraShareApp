@@ -35,8 +35,8 @@ class CameraViewModel (
 			}
 			CaptureStatus.FileSaved -> {
 				file?.let {
-					_savedFilePath.value = it
-					_captureStatus.value = status
+					_savedFilePath.postValue(it)
+					_captureStatus.postValue(status)
 				}
 			}
 		}
@@ -50,7 +50,7 @@ class CameraViewModel (
 	val permissionGrantedResult : LiveData<Event<Boolean>>
 	    get() = _permissionGrantedResult
 	fun changePermissionStatus(isGranted: Boolean) {
-		_permissionGrantedResult.value = Event(isGranted)
+		_permissionGrantedResult.postValue(Event(isGranted))
 	}
 
 	fun requestCameraPermission(activity: Activity) {
@@ -64,7 +64,7 @@ class CameraViewModel (
 	}
 
 	fun checkIsCameraPermissionGranted(activity: Activity) {
-		_permissionGrantedResult.value = Event(checkAccessPermissionGranted(activity, Manifest.permission.CAMERA))
+		_permissionGrantedResult.postValue(Event(checkAccessPermissionGranted(activity, Manifest.permission.CAMERA)))
 	}
 
 	val REQUEST_CAMERA_PERMISSION = 2707

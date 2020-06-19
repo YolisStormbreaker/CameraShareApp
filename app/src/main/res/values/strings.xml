@@ -6,4 +6,6 @@
 	<string name="status_error">Error</string>
     <string name="polite_camera_access_title">Camera Access Require</string>
 	<string name="polite_camera_access_content">Access to the camera is required for the app to work</string>
+	<string name="share_hint">Share with</string>
+	<string name="file_path" translatable="false">captured_photos</string>
 </resources>

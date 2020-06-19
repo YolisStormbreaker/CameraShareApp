@@ -18,9 +18,11 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.net.toFile
 import androidx.databinding.DataBindingUtil
 import com.google.common.util.concurrent.ListenableFuture
+import com.yolisstorm.app.BuildConfig
 import com.yolisstorm.app.R
 import com.yolisstorm.app.databinding.ActivityCameraBinding
 import com.yolisstorm.app.enums.CaptureStatus
@@ -108,6 +110,22 @@ class CameraActivity : AppCompatActivity() {
 
 	private fun shareFile(file: File) {
 		Timber.d("Let's share!")
+		// Create a sharing intent
+		val intent = Intent().apply {
+			// Infer media type from file extension
+			val mediaType = MimeTypeMap.getSingleton()
+				.getMimeTypeFromExtension(file.extension)
+			// Get URI from our FileProvider implementation
+			val uri = FileProvider.getUriForFile(
+				applicationContext, BuildConfig.APPLICATION_ID + ".provider", file)
+			// Set the appropriate intent extra, type, action and flags
+			putExtra(Intent.EXTRA_STREAM, uri)
+			type = mediaType
+			action = Intent.ACTION_SEND
+			flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+		}
+		// Launch the intent letting the user choose which app to share with
+		startActivity(Intent.createChooser(intent, getString(R.string.share_hint)))
 	}
 
 	private fun setUp(viewFinder: PreviewView) {
@@ -131,7 +149,6 @@ class CameraActivity : AppCompatActivity() {
 	private fun setUpCamera(viewFinder: PreviewView) {
 		cameraProviderFuture = ProcessCameraProvider.getInstance(applicationContext)
 		cameraProviderFuture.addListener(Runnable {
-
 			// CameraProvider
 			cameraProvider = cameraProviderFuture.get()
 
@@ -255,6 +272,7 @@ class CameraActivity : AppCompatActivity() {
 						// If the folder selected is an external media directory, this is
 						// unnecessary but otherwise other apps will not be able to access our
 						// images unless we scan them using [MediaScannerConnection]
+						viewModel.updateStatus(CaptureStatus.FileSaved, getFile(savedUri))
 						val mimeType = MimeTypeMap.getSingleton()
 							.getMimeTypeFromExtension(savedUri.toFile().extension)
 						MediaScannerConnection.scanFile(
@@ -263,7 +281,7 @@ class CameraActivity : AppCompatActivity() {
 							arrayOf(mimeType)
 						) { _, uri ->
 							Timber.d("Image capture scanned into media store: $uri")
-							viewModel.updateStatus(CaptureStatus.FileSaved, getFile(uri))
+
 						}
 					}
 				})
@@ -271,8 +289,6 @@ class CameraActivity : AppCompatActivity() {
 	}
 
 	companion object {
-
-		private const val TAG = "CameraShareApp"
 		private const val FILENAME = "yyyy-MM-dd-HH-mm-ss-SSS"
 		private const val PHOTO_EXTENSION = ".jpg"
 		private const val RATIO_4_3_VALUE = 4.0 / 3.0
@@ -285,7 +301,7 @@ class CameraActivity : AppCompatActivity() {
 		private fun getOutputDirectory(context: Context): File {
 			val appContext = context.applicationContext
 			val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-				File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() } }
+				File(it, context.resources.getString(R.string.file_path)).apply { mkdirs() } }
 			return if (mediaDir != null && mediaDir.exists())
 				mediaDir else appContext.filesDir
 		}
