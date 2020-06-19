@@ -2,6 +2,7 @@ plugins {
 	id(GradlePluginId.ANDROID_APPLICATION)
 	kotlin("android")
 	kotlin("android.extensions")
+	kotlin("kapt")
 	id(GradlePluginId.DETEKT)
 	id(GradlePluginId.CRASHLYTICS_PLUGIN)
 	id(GradlePluginId.GRADLE_UPDATE_PLUGIN)
@@ -66,8 +67,29 @@ android {
 
 dependencies {
 
-	api(LibraryDependencies.AndroidSupport.Design.ConstraintLayout)
-	api(LibraryDependencies.AndroidSupport.Design.Material)
+	implementation(LibraryDependencies.Kotlin.Core)
+	implementation(LibraryDependencies.Kotlin.Reflection)
+	implementation(LibraryDependencies.Kotlin.Coroutines.Android)
+
+	implementation(LibraryDependencies.Main.Timber)
+	implementation(LibraryDependencies.AndroidSupport.AppCompat)
+	implementation(LibraryDependencies.AndroidSupport.CoreKtx)
+	implementation(LibraryDependencies.AndroidSupport.Fragment.FragmentRuntimeKtx)
+
+	implementation(LibraryDependencies.Koin.Core)
+	implementation(LibraryDependencies.Koin.ViewModel)
+	implementation(LibraryDependencies.Koin.Ext)
+
+	implementation(LibraryDependencies.AndroidSupport.Design.ConstraintLayout)
+	implementation(LibraryDependencies.AndroidSupport.Design.Material)
+
+	implementation(LibraryDependencies.Lifecycle.Extensions)
+	implementation(LibraryDependencies.Lifecycle.LivedataKtx)
+	implementation(LibraryDependencies.Lifecycle.ViewModelKtx)
+
+	implementation(LibraryDependencies.CameraX.Camera2)
+	implementation(LibraryDependencies.CameraX.View)
+	implementation(LibraryDependencies.CameraX.Lifecycle)
 }
 
 fun com.android.build.gradle.internal.dsl.BaseFlavor.buildConfigFieldFromGradleProperty(gradlePropertyName: String) {

@@ -29,7 +29,7 @@
             <ScreenElement>
               <option name="fileNameTemplate" value="%screenName%%screenElement%" />
               <option name="name" value="KoinModule" />
-              <option name="template" value="package %packageName%&#10;&#10;import org.koin.android.ext.koin.androidApplication&#10;import org.koin.android.viewmodel.dsl.viewModel&#10;import org.koin.core.module.Module&#10;import org.koin.dsl.module&#10;&#10;val %screenName%%screenElement%  = module {&#10;&#9;single { %screenName%Repository.getInstance() }&#10;&#9;viewModel { %screenName%ViewModel(get(), androidApplication()) }&#10;}" />
+              <option name="template" value="package %packageName%&#10;&#10;import org.koin.android.ext.koin.androidApplication&#10;import org.koin.androidx.viewmodel.dsl.viewModel&#10;import org.koin.core.module.Module&#10;import org.koin.dsl.module&#10;&#10;val %screenName%%screenElement%  = module {&#10;&#9;single { %screenName%Repository.getInstance() }&#10;&#9;viewModel { %screenName%ViewModel(get(), androidApplication()) }&#10;}" />
             </ScreenElement>
           </list>
         </option>
