@@ -1,6 +1,9 @@
 package com.yolisstorm.app.views.activities.camera_main
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.media.MediaScannerConnection
@@ -9,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.webkit.MimeTypeMap
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -19,6 +23,9 @@ import androidx.databinding.DataBindingUtil
 import com.google.common.util.concurrent.ListenableFuture
 import com.yolisstorm.app.R
 import com.yolisstorm.app.databinding.ActivityCameraBinding
+import com.yolisstorm.app.enums.CaptureStatus
+import com.yolisstorm.app.utils.EventObserver
+import com.yolisstorm.app.utils.getFile
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import timber.log.Timber
 import java.io.File
@@ -26,6 +33,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.jar.Manifest
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -35,7 +43,6 @@ class CameraActivity : AppCompatActivity() {
 
 	private lateinit var binding: ActivityCameraBinding
 	private val viewModel : CameraViewModel by lazy { getViewModel(CameraViewModel::class) }
-	private lateinit var viewFinder : PreviewView
 
 	private var preview: Preview? = null
 	private var imageCapture: ImageCapture? = null
@@ -58,21 +65,70 @@ class CameraActivity : AppCompatActivity() {
 
 		binding.viewModel = viewModel
 
-		viewFinder = binding.viewFinder
+		viewModel.permissionGrantedResult.observe(this, EventObserver {
+			if (it) {
+				Timber.d("Permission Granted")
+				setUp(binding.viewFinder)
+			}
+			else {
+				Timber.d("Permission NOT Granted")
+				viewModel.updateStatus(CaptureStatus.Error)
+				viewModel.requestCameraPermission(this)
+			}
+		})
 
 	}
 
-	fun setUp(viewFinder: PreviewView) {
+	override fun onResume() {
+		super.onResume()
+		viewModel.checkIsCameraPermissionGranted(this)
+	}
+
+	override fun onRequestPermissionsResult(
+		requestCode: Int,
+		permissions: Array<out String>,
+		grantResults: IntArray
+	) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+		when (requestCode) {
+			viewModel.REQUEST_CAMERA_PERMISSION ->
+				when (grantResults.getOrNull(permissions.indexOf(android.Manifest.permission.CAMERA))) {
+					PackageManager.PERMISSION_GRANTED -> {
+						Timber.d("onRequestPermissionsResult() - User agreed to make required camera settings changes.")
+						viewModel.changePermissionStatus(true)
+					}
+					else -> {
+						Timber.d("onRequestPermissionsResult() - User chose not to make required camera settings changes.")
+						viewModel.updateStatus(CaptureStatus.Error)
+						viewModel.changePermissionStatus(false)
+					}
+				}
+		}
+	}
+
+	private fun shareFile(file: File) {
+		Timber.d("Let's share!")
+	}
+
+	private fun setUp(viewFinder: PreviewView) {
 		cameraExecutor = Executors.newSingleThreadExecutor()
 
 		outputDirectory = getOutputDirectory(applicationContext)
 
 		viewFinder.post {
-			setUpCamera()
+			setUpCamera(viewFinder)
+			viewModel.wantToShare.observe(this, EventObserver {
+				capturePhoto()
+			})
+			viewModel.savedFilePath.observe(this, androidx.lifecycle.Observer {
+				it?.let {
+					shareFile(it)
+				}
+			})
 		}
 	}
 
-	private fun setUpCamera() {
+	private fun setUpCamera(viewFinder: PreviewView) {
 		cameraProviderFuture = ProcessCameraProvider.getInstance(applicationContext)
 		cameraProviderFuture.addListener(Runnable {
 
@@ -83,11 +139,14 @@ class CameraActivity : AppCompatActivity() {
 			lensFacing = when {
 				hasBackCamera() -> CameraSelector.LENS_FACING_BACK
 				hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT
-				else -> throw IllegalStateException("Back and front camera are unavailable")
+				else -> {
+					viewModel.updateStatus(CaptureStatus.Error)
+					-1
+				}
 			}
 
 			// Build and bind the camera use cases
-			bindCameraUseCases()
+			bindCameraUseCases(viewFinder)
 
 		}, ContextCompat.getMainExecutor(applicationContext))
 	}
@@ -108,7 +167,7 @@ class CameraActivity : AppCompatActivity() {
 		return AspectRatio.RATIO_16_9
 	}
 
-	private fun bindCameraUseCases() {
+	private fun bindCameraUseCases(viewFinder: PreviewView) {
 
 		// Get screen metrics used to setup camera for full screen resolution
 		val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
@@ -119,49 +178,51 @@ class CameraActivity : AppCompatActivity() {
 
 		val rotation = viewFinder.display.rotation
 
-		// CameraProvider
-		val cameraProvider = cameraProvider
-			?: throw IllegalStateException("Camera initialization failed.")
+		if (cameraProvider == null)
+			viewModel.updateStatus(CaptureStatus.Error)
+		else {
+			// CameraSelector
+			val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
 
-		// CameraSelector
-		val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+			// Preview
+			preview = Preview.Builder()
+				// We request aspect ratio but no resolution
+				.setTargetAspectRatio(screenAspectRatio)
+				// Set initial target rotation
+				.setTargetRotation(rotation)
+				.build()
 
-		// Preview
-		preview = Preview.Builder()
-			// We request aspect ratio but no resolution
-			.setTargetAspectRatio(screenAspectRatio)
-			// Set initial target rotation
-			.setTargetRotation(rotation)
-			.build()
+			// ImageCapture
+			imageCapture = ImageCapture.Builder()
+				.setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+				// We request aspect ratio but no resolution to match preview config, but letting
+				// CameraX optimize for whatever specific resolution best fits our use cases
+				.setTargetAspectRatio(screenAspectRatio)
+				// Set initial target rotation, we will have to call this again if rotation changes
+				// during the lifecycle of this use case
+				.setTargetRotation(rotation)
+				.setFlashMode(ImageCapture.FLASH_MODE_OFF)
+				.build()
 
-		// ImageCapture
-		imageCapture = ImageCapture.Builder()
-			.setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-			// We request aspect ratio but no resolution to match preview config, but letting
-			// CameraX optimize for whatever specific resolution best fits our use cases
-			.setTargetAspectRatio(screenAspectRatio)
-			// Set initial target rotation, we will have to call this again if rotation changes
-			// during the lifecycle of this use case
-			.setTargetRotation(rotation)
-			.setFlashMode(ImageCapture.FLASH_MODE_OFF)
-			.build()
+			// Must unbind the use-cases before rebinding them
+			cameraProvider!!.unbindAll()
 
-		// Must unbind the use-cases before rebinding them
-		cameraProvider.unbindAll()
+			try {
+				// A variable number of use-cases can be passed here -
+				// camera provides access to CameraControl & CameraInfo
+				camera = cameraProvider!!.bindToLifecycle(this, cameraSelector, preview, imageCapture)
 
-		try {
-			// A variable number of use-cases can be passed here -
-			// camera provides access to CameraControl & CameraInfo
-			camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture)
-
-			// Attach the viewfinder's surface provider to preview use case
-			preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
-		} catch (exc: Exception) {
-			Timber.e("Use case binding failed - $exc")
+				// Attach the viewfinder's surface provider to preview use case
+				preview?.setSurfaceProvider(viewFinder.createSurfaceProvider())
+				viewModel.updateStatus(CaptureStatus.ReadyToShoot)
+			} catch (exc: Exception) {
+				viewModel.updateStatus(CaptureStatus.Error)
+				Timber.e("Use case binding failed - $exc")
+			}
 		}
 	}
 
-	private fun capturePhoto() : File {
+	private fun capturePhoto() {
 		// Get a stable reference of the modifiable image capture use case
 		imageCapture?.let { imageCapture ->
 
@@ -184,27 +245,13 @@ class CameraActivity : AppCompatActivity() {
 			imageCapture.takePicture(
 				outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
 					override fun onError(exc: ImageCaptureException) {
+						viewModel.updateStatus(CaptureStatus.Error)
 						Timber.e("Photo capture failed: ${exc.message}")
 					}
 
 					override fun onImageSaved(output: ImageCapture.OutputFileResults) {
 						val savedUri = output.savedUri ?: Uri.fromFile(photoFile)
 						Timber.d("Photo capture succeeded: $savedUri")
-
-						/*// We can only change the foreground Drawable using API level 23+ API
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-							// Update the gallery thumbnail with latest picture taken
-							//setGalleryThumbnail(savedUri)
-						}
-
-						// Implicit broadcasts will be ignored for devices running API level >= 24
-						// so if you only target API level 24+ you can remove this statement
-						if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-							requireActivity().sendBroadcast(
-								Intent(android.hardware.Camera.ACTION_NEW_PICTURE, savedUri)
-							)
-						}*/
-
 						// If the folder selected is an external media directory, this is
 						// unnecessary but otherwise other apps will not be able to access our
 						// images unless we scan them using [MediaScannerConnection]
@@ -216,6 +263,7 @@ class CameraActivity : AppCompatActivity() {
 							arrayOf(mimeType)
 						) { _, uri ->
 							Timber.d("Image capture scanned into media store: $uri")
+							viewModel.updateStatus(CaptureStatus.FileSaved, getFile(uri))
 						}
 					}
 				})

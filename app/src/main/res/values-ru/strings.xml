@@ -5,4 +5,6 @@
     <string name="status_ready">Готов к работе</string>
     <string name="status_saved_in_template">Сохранено в файл %1$s</string>
     <string name="status_error">Ошибка</string>
+    <string name="polite_camera_access_content">Для работы приложения необходим доступ к камере</string>
+    <string name="polite_camera_access_title">Запрос доступа к камере</string>
 </resources>

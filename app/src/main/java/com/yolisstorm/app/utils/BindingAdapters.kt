@@ -1,6 +1,5 @@
 package com.yolisstorm.app.utils
 
-import android.net.Uri
 import androidx.databinding.BindingAdapter
 import com.google.android.material.textview.MaterialTextView
 import com.yolisstorm.app.R
@@ -20,6 +19,9 @@ fun MaterialTextView.setStatus(status: CaptureStatus?, filePath: String?) {
 				resources.getString(R.string.status_error)
 			else
 				resources.getString(R.string.status_saved_in_template, filePath)
+		}
+		CaptureStatus.Error -> {
+			resources.getString(R.string.status_error)
 		}
 	}
 }
