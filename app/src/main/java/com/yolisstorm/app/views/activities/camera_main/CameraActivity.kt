@@ -138,7 +138,7 @@ class CameraActivity : AppCompatActivity() {
 			viewModel.wantToShare.observe(this, EventObserver {
 				capturePhoto()
 			})
-			viewModel.savedFilePath.observe(this, androidx.lifecycle.Observer {
+			viewModel.savedFilePath.observe(this, EventObserver {
 				it?.let {
 					shareFile(it)
 				}
