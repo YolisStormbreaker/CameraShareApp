@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Camera Share</string>
+    <string name="share_btn_text">Поделиться</string>
+    <string name="status_ready">Готов к работе</string>
+    <string name="status_saved_in_template">Сохранено в файл %1$s</string>
+    <string name="status_error">Ошибка</string>
+    <string name="polite_camera_access_content">Для работы приложения необходим доступ к камере</string>
+    <string name="polite_camera_access_title">Запрос доступа к камере</string>
+	<string name="share_hint">Поделиться через</string>
+</resources>
