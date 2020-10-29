@@ -1,0 +1,9 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "net.openid.appauthdemo.moreidps",
+    "sha256_cert_fingerprints":
+    ["F2:37:16:CE:2E:94:05:34:3C:3E:7D:81:31:F6:B1:A7:17:9E:F0:19:35:48:08:4E:3E:19:B0:F8:B2:40:CC:73"]
+  }
+}]
